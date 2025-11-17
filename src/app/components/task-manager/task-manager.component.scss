@@ -1,0 +1,55 @@
+.card-header {
+  font-size: 1rem;
+}
+
+.btn-success {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.table td, .table th {
+  vertical-align: middle;
+  padding: 0.35rem 0.5rem;
+}
+.bi-pencil, .bi-trash {
+  cursor: pointer;
+}
+
+.border-dashed {
+  border: 2px dashed #e9ecef;
+  border-radius: 6px;
+}
+
+.small-table table {
+  font-size: 0.7rem;
+}
+
+.small-table .p-datatable-thead > tr > th,
+.small-table .p-datatable-tbody > tr > td,
+.small-table .p-datatable-tfoot > tr > td {
+  padding: 0.35rem 0.5rem !important;
+}
+
+.small-table .badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.4rem;
+}
+
+.small-btn {
+  padding: 0.2rem 0.35rem;
+  font-size: 0.7rem;
+  min-width: 2rem;
+  height: 32px;
+}
+
+.small-table .pi,
+.small-btn .pi {
+  font-size: 0.5rem;
+}
+
+
+:host ::ng-deep .p-datatable-thead > tr > th,
+:host ::ng-deep .p-datatable-tbody > tr > td,
+:host ::ng-deep .p-datatable-tfoot > tr > td {
+  padding: 0.25rem 0.5rem !important;
+}

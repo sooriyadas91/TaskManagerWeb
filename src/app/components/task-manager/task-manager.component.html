@@ -1,0 +1,73 @@
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Task Manager</h3>
+    <button pButton label="Add Task" icon="pi pi-plus" class="p-button-success" (click)="openAddTaskModal()"></button>
+  </div>
+
+  <!-- Search -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <input type="text" pInputText placeholder="Search..." [(ngModel)]="searchTerm" (input)="onSearchChange()" class="w-25"/>
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-md-7">
+  <p-table #dt class="small-table"
+               [value]="tasks"
+               [paginator]="true"
+               [rows]="10"
+               [totalRecords]="totalRecords"
+               [lazy]="true"
+               (onLazyLoad)="loadTasks($event)"
+               [loading]="loading"
+               [rowsPerPageOptions]="[5,10,20]"
+               [sortMode]="'single'"
+               size="small">
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="title">Title <p-sortIcon field="title"></p-sortIcon></th>
+            <th pSortableColumn="description">Description <p-sortIcon field="description"></p-sortIcon></th>
+            <th pSortableColumn="assignee">Assignee <p-sortIcon field="assignee"></p-sortIcon></th>
+            <th pSortableColumn="priority">Priority <p-sortIcon field="priority"></p-sortIcon></th>
+            <th pSortableColumn="status">Status <p-sortIcon field="status"></p-sortIcon></th>
+            <th pSortableColumn="dueDate">Due Date <p-sortIcon field="dueDate"></p-sortIcon></th>
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-task>
+          <tr>
+            <td>{{ task.title }}</td>
+            <td>{{ task.description }}</td>
+            <td><i class="bi bi-person-fill me-1"></i>{{ task.assignee }}</td>
+            <td>
+              <span class="badge"
+                    [ngClass]="{
+                      'bg-success': task.priority === 'Low',
+                      'bg-warning text-dark': task.priority === 'Medium',
+                      'bg-danger': task.priority === 'High'
+                    }">{{ task.priority }}</span>
+            </td>
+            <td>{{ task.status }}</td>
+            <td [ngClass]="getDueDateClass(task.dueDate)">{{ task.dueDate | date:'mediumDate' }}</td>
+            <td>
+              <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text small-btn" (click)="editTask(task)"></button>
+              <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text small-btn ms-1" (click)="deleteTask(task)"></button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- Right: Inline add/edit -->
+    <div class="col-12 col-md-5">
+      <div *ngIf="selectedTask; else placeholder">
+        <app-task-item [task]="selectedTask" (saved)="save($event)" (cancelled)="selectedTask = undefined"></app-task-item>
+      </div>
+      <ng-template #placeholder>
+        <div class="card border-dashed p-4 text-center text-muted">
+          <div class="h5">Select a task to edit or click "Add Task"</div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>

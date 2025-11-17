@@ -1,0 +1,95 @@
+<div class="card">
+  <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{{ task.id ? 'Edit Task' : 'Add Task' }}</h5>
+    <button type="button" class="btn btn-sm btn-light" (click)="cancel()">Cancel</button>
+  </div>
+
+  <form #taskForm="ngForm" class="card-body" *ngIf="task">
+    <div class="mb-2">
+      <label>Title</label>
+      <input
+        name="title"
+        required
+        minlength="1"
+        [(ngModel)]="task.title"
+        #titleModel="ngModel"
+        class="form-control"
+      />
+      <div class="invalid-feedback d-block" *ngIf="titleModel.invalid && (titleModel.dirty || titleModel.touched)">
+        <div *ngIf="titleModel.errors?.['required']">Title is required.</div>
+        <div *ngIf="titleModel.errors?.['minlength']">Title must not be empty.</div>
+      </div>
+    </div>
+
+    <div class="mb-2">
+      <label>Description</label>
+      <textarea
+        name="description"
+        [(ngModel)]="task.description"
+        class="form-control"
+      ></textarea>
+    </div>
+
+    <div class="mb-2">
+      <label>Assignee</label>
+      <input
+        name="assignee"
+        [(ngModel)]="task.assignee"
+        class="form-control"
+      />
+    </div>
+
+    <div class="mb-2">
+      <label>Status</label>
+      <select
+        name="status"
+        [(ngModel)]="task.statusId"
+        class="form-select"
+        required
+        #statusModel="ngModel"
+      >
+        <option *ngFor="let s of statuses" [value]="s.id">{{ s.name | titlecase }}</option>
+      </select>
+      <div class="invalid-feedback d-block" *ngIf="statusModel.invalid && (statusModel.dirty || statusModel.touched)">
+        <div *ngIf="statusModel.errors?.['required']">Status is required.</div>
+      </div>
+    </div>
+
+    <div class="mb-2">
+      <label>Priority</label>
+      <select
+        name="priority"
+        [(ngModel)]="task.priorityId"
+        class="form-select"
+        required
+        #priorityModel="ngModel"
+      >
+        <option *ngFor="let p of priorities" [value]="p.id">{{ p.name | titlecase }}</option>
+      </select>
+      <div class="invalid-feedback d-block" *ngIf="priorityModel.invalid && (priorityModel.dirty || priorityModel.touched)">
+        <div *ngIf="priorityModel.errors?.['required']">Priority is required.</div>
+      </div>
+    </div>
+
+    <div class="mb-2">
+      <label class="form-label">Due Date</label>
+      <input
+        type="date"
+        name="dueDate"
+        class="form-control"
+        [ngModel]="task.dueDate ? (task.dueDate | date:'yyyy-MM-dd') : null"
+        (ngModelChange)="updateDueDate($event)"
+        required
+        #dueDateModel="ngModel"
+      />
+      <div class="invalid-feedback d-block" *ngIf="dueDateModel.invalid && (dueDateModel.dirty || dueDateModel.touched)">
+        <div *ngIf="dueDateModel.errors?.['required']">Due date is required.</div>
+      </div>
+    </div>
+  </form>
+
+<div class="card-footer text-end" *ngIf="taskForm">
+  <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+  <button class="btn btn-primary" [disabled]="taskForm.form.invalid" (click)="save()">Save</button>
+</div>
+</div>
