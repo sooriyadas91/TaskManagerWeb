@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnDestroy } from '@angular/core';
 import { LazyLoadEvent, MessageService } from 'primeng/api';
 import { TaskService } from '../../services/task.service';
 import { TaskSearchRequest } from '../../models/task-search.model';
@@ -7,13 +7,19 @@ import { ConfirmModalComponent } from 'src/app/shared/components/confirm-modal/c
 import { ToastrService } from 'ngx-toastr';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { BsComponentRef } from 'ngx-bootstrap/component-loader';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-task-manager',
   templateUrl: './task-manager.component.html',
    styleUrls: ['./task-manager.component.scss']
 })
-export class TaskManagerComponent {
+export class TaskManagerComponent implements OnDestroy {
+  subscriptions: Subscription[] =[];
+  loadTasksSub?: Subscription;
+  saveTaskSub?: Subscription;
+  updateTaskSub? :Subscription;
+  deleteTaskSub?: Subscription;
   @ViewChild('dt') table: any;
   tasks: Task[] = [];
   totalRecords = 0;
@@ -39,7 +45,7 @@ export class TaskManagerComponent {
       search: this.searchTerm
     };
 
-    this.taskService.search(body).subscribe({
+    this.loadTasksSub = this.taskService.search(body).subscribe({
       next: (res) => {
         this.tasks = res.items;
         this.totalRecords = res.totalCount;
@@ -49,6 +55,7 @@ export class TaskManagerComponent {
         this.loading = false;
       }
     });
+    this.subscriptions.push(this.loadTasksSub);
   }
 
   onSearchChange() {
@@ -67,32 +74,40 @@ export class TaskManagerComponent {
   }
 
   save(task: Task) {
+
     if (task.id === 0) {
-      this.taskService.create(task).subscribe(() => {
+      this.saveTaskSub = this.taskService.create(task).subscribe(() => {
         this.toastr.success('Task added successfully', 'Added');
         this.loadTasks();
         this.selectedTask = undefined;
       });
+      this.subscriptions.push(this.saveTaskSub);
     } else {
-      this.taskService.update(task.id, task).subscribe(() => {
+      this.updateTaskSub = this.taskService.update(task.id, task).subscribe(() => {
         this.toastr.success('Task updated successfully', 'Updated');
         this.loadTasks();
         this.selectedTask = undefined;
       });
+      this.subscriptions.push(this.updateTaskSub);
     }
+
   }
 
  deleteTask(task: Task) { 
   const initialState = { message: 'Are you sure you want to delete this task?', 
   onConfirm: () => { 
-      this.taskService.delete(task.id).subscribe(() => {
+      this.deleteTaskSub = this.taskService.delete(task.id).subscribe(() => {
         this.toastr.success('Task deleted successfully', 'Deleted');
         this.loadTasks();
       });
+      this.subscriptions.push(this.deleteTaskSub);
    } 
   }; 
   this.bsModalRef = this.modalService.show(ConfirmModalComponent, { initialState });
  }
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
 
   getDueDateClass(dueDate?: Date) {
     if (!dueDate) return '';

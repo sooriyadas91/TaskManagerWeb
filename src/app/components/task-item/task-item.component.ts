@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter, ViewChild, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { Task } from '../../models/task.model';
 import { NgForm } from '@angular/forms';
 import { LookupService } from '../../services/lookup.service';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { Priority } from 'src/app/models/priority.model';
 import { TaskStatus } from 'src/app/models/task-status.model';
 
@@ -12,7 +12,8 @@ import { TaskStatus } from 'src/app/models/task-status.model';
   templateUrl: './task-item.component.html',
   styleUrls: ['./task-item.component.scss']
 })
-export class TaskItemComponent implements OnInit {
+export class TaskItemComponent implements OnInit, OnDestroy {
+    private lookupSub?: Subscription;
   @Input() task: Task = {} as Task;
   @Output() saved = new EventEmitter<Task>();
   @Output() cancelled = new EventEmitter<void>();
@@ -25,7 +26,7 @@ export class TaskItemComponent implements OnInit {
   constructor(private lookupService: LookupService) {}
 
   ngOnInit(): void {
-    combineLatest([
+    this.lookupSub = combineLatest([
       this.lookupService.getStatuses(),
       this.lookupService.getPriorities()
     ]).subscribe(([statuses, priorities]) => {
@@ -40,7 +41,6 @@ export class TaskItemComponent implements OnInit {
   }
 
   save() {
-    // basic validation check
     if (this.taskForm?.form?.invalid) return;
     this.saved.emit(this.task);
   }
@@ -51,5 +51,12 @@ export class TaskItemComponent implements OnInit {
 
   updateDueDate(event: string) {
     this.task.dueDate = event ? new Date(event) : undefined;
+  }
+
+  
+  ngOnDestroy(): void {
+    if (this.lookupSub) {
+      this.lookupSub.unsubscribe();
+    }
   }
 }
