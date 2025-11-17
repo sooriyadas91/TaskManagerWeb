@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, ViewChild, OnInit } from '@angu
 import { Task } from '../../models/task.model';
 import { NgForm } from '@angular/forms';
 import { LookupService } from '../../services/lookup.service';
-import { forkJoin } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { Priority } from 'src/app/models/priority.model';
 import { TaskStatus } from 'src/app/models/task-status.model';
 
@@ -25,12 +25,12 @@ export class TaskItemComponent implements OnInit {
   constructor(private lookupService: LookupService) {}
 
   ngOnInit(): void {
-    forkJoin({
-      statuses: this.lookupService.getStatuses(),
-      priorities: this.lookupService.getPriorities()
-    }).subscribe(l => {
-      this.statuses = l.statuses;
-      this.priorities = l.priorities;
+    combineLatest([
+      this.lookupService.getStatuses(),
+      this.lookupService.getPriorities()
+    ]).subscribe(([statuses, priorities]) => {
+      this.statuses = statuses;
+      this.priorities = priorities;
       if (!this.task || !this.task.id || this.task.id === 0) {
         if (!this.task.statusId && this.statuses.length) this.task.statusId = this.statuses[0].id;
         if (!this.task.priorityId && this.priorities.length) this.task.priorityId = this.priorities[0].id;
